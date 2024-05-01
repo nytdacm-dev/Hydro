@@ -82,6 +82,7 @@ API: API
 Argument {0} is invalid.: 非法的参数 {0} 。
 Arguments: 参数
 astyle formatting options: Astyle 格式化选项
+AtCoder handle: AtCoder 用户名
 At least 4 characters: 至少 4 个字符
 Attend Contest: 参加比赛
 Attend contests: 参加比赛
@@ -130,6 +131,7 @@ Code blocks: 代码区块
 Code language settings: 编程语言设置
 Code language: 代码语言
 Code: 代码
+Codeforces handle: Codeforces 用户名
 collapse: 收缩
 Comment: 评论
 Comments: 评论
@@ -171,6 +173,8 @@ Contests per page: 每页展示的比赛数量
 Continue: 继续
 Contributed Problems: 贡献的题目
 Contributions: 贡献
+Copy AtCoder Account: 复制AtCoder用户名
+Copy Codeforces Account: 复制Codeforces用户名
 Copy Email: 复制电子邮件
 Copy from: 复制自
 Copy QQ Number: 复制QQ号

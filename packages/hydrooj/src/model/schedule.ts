@@ -66,6 +66,7 @@ export async function apply(ctx: Context) {
             await RecordModel.coll.deleteMany({ contest: { $in: [RecordModel.RECORD_PRETEST, RecordModel.RECORD_GENERATE] } });
             await global.Hydro.script.rp?.run({}, new Logger('task/rp').debug);
             await global.Hydro.script.problemStat?.run({}, new Logger('task/problem').debug);
+            await global.Hydro.script.codeforcesRating?.run({}, new Logger('task/codeforcesRating').debug);
             if (global.Hydro.model.system.get('server.checkUpdate') && !(new Date().getDay() % 3)) {
                 await global.Hydro.script.checkUpdate?.run({}, new Logger('task/checkUpdate').debug);
             }

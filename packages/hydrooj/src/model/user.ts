@@ -73,6 +73,8 @@ export class User {
     tfa: boolean;
     authn: boolean;
     group?: string[];
+
+    codeforcesRating?: number;
     [key: string]: any;
 
     constructor(udoc: Udoc, dudoc, scope = PERM.PERM_ALL) {
@@ -101,6 +103,8 @@ export class User {
         this.tfa = !!udoc.tfa;
         this.authn = (udoc.authenticators || []).length > 0;
         if (dudoc.group) this.group = dudoc.group;
+
+        this.codeforcesRating = udoc.codeforcesRating;
 
         for (const key in setting.SETTINGS_BY_KEY) {
             this[key] = udoc[key] ?? (setting.SETTINGS_BY_KEY[key].value || system.get(`preference.${key}`));
@@ -167,7 +171,10 @@ export class User {
 
     serialize(options) {
         if (!this._isPrivate) {
-            const fields = ['_id', 'uname', 'mail', 'perm', 'role', 'priv', 'regat', 'loginat', 'tfa', 'authn'];
+            const fields = [
+                '_id', 'uname', 'mail', 'perm', 'role', 'priv', 'regat', 'loginat', 'tfa', 'authn',
+                'codeforcesRating', 'codeforcesHandle',
+            ];
             if (options.showDisplayName) fields.push('displayName');
             return pick(this, fields);
         }

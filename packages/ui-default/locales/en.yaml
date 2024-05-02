@@ -1,6 +1,7 @@
 __langname: English
 'File IO: {0}': 'File IO: {0}'
 Can be Extended For: Extension
+codeforces_rating: Codeforces Rating
 Current Status: Status
 Handled Requests: Req
 Hint::icon::difficulty: The difficulty of the problems in Hydro will be calculated by algorithm, depending on current submission, sometimes the difficulty may not so exact.

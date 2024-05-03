@@ -1,3 +1,4 @@
+import PQueue from 'p-queue';
 import Schema from 'schemastery';
 import superagent from 'superagent';
 import db from '../service/db';
@@ -19,14 +20,18 @@ export async function run(_, report) {
     const coll = db.collection('user');
     const users = await coll.find({ codeforcesHandle: { $exists: true, $ne: '' } }).toArray();
     report({ message: `Found ${users.length} users with codeforces handle` });
-    const promises = users.map(async (user) => {
-        const rating = await getCodeforcesRating(user.codeforcesHandle);
-        report({ message: `User ${user.uname} rating: ${rating}` });
-        if (rating !== null) {
-            await coll.updateOne({ _id: user._id }, { $set: { codeforcesRating: rating } });
-        }
-    });
-    await Promise.all(promises);
+    const queue = new PQueue({ concurrency: 1 });
+    for (const user of users) {
+        queue.add(async () => {
+            const rating = await getCodeforcesRating(user.codeforcesHandle);
+            report({ message: `User [${user._id}]${user.uname} (${user.codeforcesHandle}) rating: ${rating}` });
+            if (rating !== null) {
+                await coll.updateOne({ _id: user._id }, { $set: { codeforcesRating: rating } });
+            }
+        });
+    }
+    await queue.onIdle();
+    report({ message: 'Done' });
 }
 
 export const apply = (ctx) => ctx.addScript('codeforcesRating', 'Calculate user\'s codeforces rating', Schema.any(), run);

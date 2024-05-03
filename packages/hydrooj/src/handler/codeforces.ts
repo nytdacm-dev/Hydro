@@ -10,7 +10,7 @@ class CodeforcesRatingHandler extends Handler {
     @query('page', Types.PositiveInt, true)
     async get(domainId: string, page = 1) {
         const [dudocs, upcount, ucount] = await paginate(
-            user.getMulti({ _id: { $gt: 1 }, codeforcesRating: { $exists: true } }).sort({ codeforcesRating: -1 }),
+            user.getMulti({ _id: { $gt: 1 }, codeforcesRating: { $gt: 0 } }).sort({ codeforcesRating: -1 }),
             page,
             100,
         );

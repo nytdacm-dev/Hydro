@@ -41,6 +41,7 @@ registerValue('User', [
     ['tfa', 'Boolean!'],
     ['authn', 'Boolean!'],
     ['displayName', 'String'],
+    ['rpInfo', 'JSONObject'],
 ]);
 
 registerResolver('Query', 'user(id: Int, uname: String, mail: String)', 'User', (arg, ctx) => {
@@ -54,6 +55,7 @@ Returns current user if no argument is provided.`);
 registerResolver('Query', 'users(ids: [Int], search: String, limit: Int, exact: Boolean)', '[User]', async (arg, ctx) => {
     if (arg.ids?.length) {
         const res = await user.getList(ctx.args.domainId, arg.ids);
+        for (const i in res) res[i].avatarUrl = avatar(res[i].avatar);
         return Object.keys(res).map((id) => res[+id]);
     }
     if (!arg.search) return [];
@@ -225,7 +227,7 @@ class UserLogoutHandler extends Handler {
         this.response.template = 'user_logout.html';
     }
 
-    async post(domainId: string) {
+    async post({ domainId }) {
         this.context.HydroContext.user = await user.getById(domainId, 0);
         this.session.uid = 0;
         this.session.sudo = null;

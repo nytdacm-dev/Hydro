@@ -12,7 +12,6 @@ export default new NamedPage('home_account', () => {
       <option value="gravatar">${i18n('Gravatar')}</option>
       <option value="github">${i18n('Github')}</option>
       <option value="qq">${i18n('QQ')}</option>
-      <option value="upload">${i18n('Upload')}</option>
     </select>
   `);
   const $text = $(tpl`<input type="text" class="textbox" placeholder="${i18n('Avatar URL')}">`);

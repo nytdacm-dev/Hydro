@@ -183,13 +183,9 @@ export class User {
 }
 
 function handleMailLower(mail: string) {
-    let data = mail.trim().toLowerCase();
-    if (data.endsWith('@googlemail.com')) data = data.replace('@googlemail.com', '@gmail.com');
-    if (data.endsWith('@gmail.com')) {
-        const [prev] = data.split('@');
-        data = `${prev.replace(/[.+]/g, '')}@gmail.com`;
-    }
-    return data;
+    const [n, d] = mail.trim().toLowerCase().split('@');
+    const [name] = n.split('+');
+    return `${name.replace(/\./g, '')}@${d === 'googlemail.com' ? 'gmail.com' : d}`;
 }
 
 async function initAndCache(udoc: Udoc, dudoc, scope: bigint = PERM.PERM_ALL) {
@@ -395,7 +391,7 @@ class UserModel {
         const [udocs, vudocs, dudocs] = await Promise.all([
             UserModel.getMulti({ _id: { $in: uids } }, ['_id', 'uname', 'mail', 'avatar', 'school', 'studentId']).toArray(),
             collV.find({ _id: { $in: uids } }).toArray(),
-            domain.getDomainUserMulti(domainId, uids).project({ uid: true, displayName: showDisplayName }).toArray(),
+            domain.getDomainUserMulti(domainId, uids).project({ uid: 1, ...(showDisplayName ? { displayName: 1 } : {}) }).toArray(),
         ]);
         const udict = {};
         for (const udoc of udocs) udict[udoc._id] = udoc;

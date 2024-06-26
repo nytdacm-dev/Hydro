@@ -24,7 +24,7 @@ export default class RecordModel {
         '_id', 'score', 'time', 'memory', 'lang',
         'uid', 'pid', 'rejudged', 'progress', 'domainId',
         'contest', 'judger', 'judgeAt', 'status', 'source',
-        'files',
+        'files', 'hackTarget',
     ];
 
     static STAT_QUERY = {
@@ -122,6 +122,7 @@ export default class RecordModel {
             contest?: ObjectId,
             input?: string,
             files?: Record<string, string>,
+            hackTarget?: ObjectId,
             type: 'judge' | 'rejudge' | 'pretest' | 'hack' | 'generate',
         } = { type: 'judge' },
     ) {
@@ -146,6 +147,7 @@ export default class RecordModel {
         let isContest = !!args.contest;
         if (args.contest) data.contest = args.contest;
         if (args.files) data.files = args.files;
+        if (args.hackTarget) data.hackTarget = args.hackTarget;
         if (args.type === 'rejudge') {
             args.type = 'judge';
             data.rejudged = true;
@@ -232,7 +234,7 @@ export default class RecordModel {
             judger: null,
         };
         if (isRejudge) upd.rejudged = true;
-        await RecordModel.collStat.deleteOne(rid instanceof Array ? { _id: { $in: rid } } : { _id: rid });
+        await RecordModel.collStat.deleteMany(rid instanceof Array ? { _id: { $in: rid } } : { _id: rid });
         await task.deleteMany(rid instanceof Array ? { rid: { $in: rid } } : { rid });
         return RecordModel.update(domainId, rid, upd);
     }
@@ -256,20 +258,26 @@ export default class RecordModel {
 
 export function apply(ctx: Context) {
     // Mark problem as deleted
-    ctx.on('problem/delete', (domainId, docId) => RecordModel.coll.deleteMany({ domainId, pid: docId }));
+    ctx.on('problem/delete', (domainId, docId) => Promise.all([
+        RecordModel.coll.deleteMany({ domainId, pid: docId }),
+        RecordModel.collStat.deleteMany({ domainId, pid: docId }),
+    ]));
     ctx.on('domain/delete', (domainId) => RecordModel.coll.deleteMany({ domainId }));
-    ctx.on('record/judge', (rdoc, updated) => {
+    ctx.on('record/judge', async (rdoc, updated) => {
         if (rdoc.status === STATUS.STATUS_ACCEPTED && updated) {
-            RecordModel.collStat.insertOne({
+            await RecordModel.collStat.updateOne({
                 _id: rdoc._id,
-                domainId: rdoc.domainId,
-                pid: rdoc.pid,
-                uid: rdoc.uid,
-                time: rdoc.time,
-                memory: rdoc.memory,
-                length: rdoc.code?.length || 0,
-                lang: rdoc.lang,
-            });
+            }, {
+                $set: {
+                    domainId: rdoc.domainId,
+                    pid: rdoc.pid,
+                    uid: rdoc.uid,
+                    time: rdoc.time,
+                    memory: rdoc.memory,
+                    length: rdoc.code?.length || 0,
+                    lang: rdoc.lang,
+                },
+            }, { upsert: true });
         }
     });
     ctx.on('ready', async () => {

@@ -290,7 +290,7 @@ export class ContestScoreboardHandler extends ContestDetailBaseHandler {
         if (!realtime && this.tdoc.lockAt && !this.tdoc.unlocked) {
             config.lockAt = this.tdoc.lockAt;
         }
-        const allGroups = this.user.hasPerm(PERM.PERM_EDIT_CONTEST_SELF) || (this.user.own(this.tdoc) && this.user.hasPerm(PERM.PERM_EDIT_CONTEST));
+        const allGroups = (this.user.hasPerm(PERM.PERM_EDIT_CONTEST_SELF) && this.user.own(this.tdoc)) || this.user.hasPerm(PERM.PERM_EDIT_CONTEST);
         const [[, rows, udict, pdict], groups] = await Promise.all([
             contest.getScoreboard.call(this, domainId, tid, config),
             user.listGroup(domainId, allGroups ? undefined : this.user._id),
@@ -636,6 +636,7 @@ export class ContestManagementHandler extends ContestManagementBaseHandler {
         this.tdoc.score ||= {};
         this.tdoc.score[pid] = score;
         await contest.edit(domainId, this.tdoc.docId, { score: this.tdoc.score });
+        await contest.recalcStatus(domainId, this.tdoc.docId);
         this.back();
     }
 }

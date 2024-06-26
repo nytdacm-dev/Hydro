@@ -293,7 +293,7 @@ SystemSetting(
 // eslint-disable-next-line import/no-mutable-exports
 export const langs: Record<string, LangConfig> = {};
 
-declare module '../context' {
+declare module 'cordis' {
     interface Context {
         setting: SettingService;
     }
@@ -322,6 +322,7 @@ export class SettingService extends Service {
 }
 
 export async function apply(ctx: Context) {
+    ctx.provide('setting', undefined, true);
     ctx.plugin(SettingService);
     logger.info('Ensuring settings');
     const system = global.Hydro.model.system;

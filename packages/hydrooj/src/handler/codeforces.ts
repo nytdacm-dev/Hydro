@@ -1,5 +1,4 @@
 import { Context } from '../context';
-import paginate from '../lib/paginate';
 import { PRIV } from '../model/builtin';
 import user from '../model/user';
 import {
@@ -9,10 +8,10 @@ import {
 class CodeforcesRatingHandler extends Handler {
     @query('page', Types.PositiveInt, true)
     async get(domainId: string, page = 1) {
-        const [dudocs, upcount, ucount] = await paginate(
+        const [dudocs, upcount, ucount] = await this.paginate(
             user.getMulti({ _id: { $gt: 1 }, codeforcesRating: { $gt: 0 } }).sort({ codeforcesRating: -1 }),
             page,
-            100,
+            'ranking',
         );
         const udict = await user.getList(domainId, dudocs.map((dudoc) => dudoc._id));
         const udocs = dudocs.map((i) => udict[i._id]);

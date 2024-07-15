@@ -1,5 +1,5 @@
-import 'matchmedia-polyfill';
 import 'core-js/stable';
+import 'matchmedia-polyfill';
 
 import browserUpdate from 'browser-update';
 
@@ -12,10 +12,22 @@ browserUpdate({
 });
 
 // monaco-editor requires this polyfill
-if (window.MediaQueryList) {
+if (window.MediaQueryList && !MediaQueryList.prototype.addEventListener) {
   MediaQueryList.prototype.addEventListener = (k, listener) => {
     MediaQueryList.prototype.addListener(listener);
   };
+}
+if (typeof window['WeakRef'] === 'undefined') {
+  // @ts-ignore
+  window.WeakRef = (function (wm) {
+    function WeakRef(target) {
+      wm.set(this, target);
+    }
+    WeakRef.prototype.deref = function () {
+      return wm.get(this);
+    };
+    return WeakRef;
+  }(new WeakMap()));
 }
 if (!(window.matchMedia('all').addListener || window.matchMedia('all').addEventListener)) {
   const localMatchMedia = window.matchMedia;
